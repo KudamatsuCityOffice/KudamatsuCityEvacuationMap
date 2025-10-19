@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>避難所マップ（地理院地図＋航空写真）</title>
+  <title>避難所マップ（OSM＋航空写真）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
@@ -60,10 +60,9 @@
     const map = L.map('map').setView([34.05, 131.85], 13);
 
     const baseMaps = {
-      "標準地図": L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
-        attribution: '地理院地図',
-        maxZoom: 18,
-        minZoom: 5
+      "OSM 標準地図": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
       }),
       "航空写真": L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/ort/{z}/{x}/{y}.png', {
         attribution: '地理院航空写真',
@@ -72,10 +71,9 @@
       })
     };
 
-    baseMaps["標準地図"].addTo(map);
+    baseMaps["OSM 標準地図"].addTo(map);
     L.control.layers(baseMaps).addTo(map);
 
-    // 現在地表示
     map.locate({ setView: true, maxZoom: 16 });
 
     map.on('locationfound', function(e) {
