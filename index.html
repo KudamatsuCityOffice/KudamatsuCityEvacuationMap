@@ -82,6 +82,12 @@
 
     L.control.layers(baseMaps).addTo(map);
 
+    map.on('baselayerchange', function(e) {
+      if (e.name === "航空写真" && map.getZoom() > 18) {
+        map.setZoom(13);
+      }
+    });
+
     map.locate({ setView: true, maxZoom: 16 });
 
     map.on('locationfound', function(e) {
@@ -110,19 +116,19 @@
 
     const statusIcons = {
       '開設中': L.icon({
-        iconUrl: 'https://kudamatsucityoffice.github.io/KudamatsuCityEvacuationMap/images/open.png',
+        iconUrl: 'images/open.png',
         iconSize: [32, 32],
         iconAnchor: [16, 32],
         popupAnchor: [0, -32]
       }),
       '閉鎖': L.icon({
-        iconUrl: 'https://kudamatsucityoffice.github.io/KudamatsuCityEvacuationMap/images/closed.png',
+        iconUrl: 'images/closed.png',
         iconSize: [32, 32],
         iconAnchor: [16, 32],
         popupAnchor: [0, -32]
       }),
       '未開設': L.icon({
-        iconUrl: 'https://kudamatsucityoffice.github.io/KudamatsuCityEvacuationMap/images/not_opened.png',
+        iconUrl: 'images/not_opened.png',
         iconSize: [32, 32],
         iconAnchor: [16, 32],
         popupAnchor: [0, -32]
