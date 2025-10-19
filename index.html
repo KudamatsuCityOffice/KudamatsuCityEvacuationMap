@@ -31,16 +31,17 @@
       data.forEach(rec => {
         const lat = parseFloat(rec.lat);
         const lng = parseFloat(rec.lng);
-        const status = rec.status;
+        const status = rec.status || '未開設';
         const name = rec.name;
         const note = rec.note || '';
+        const color = statusColors[status] || 'gray';
 
         if (!lat || !lng) return;
 
         const marker = L.circleMarker([lat, lng], {
           radius: 8,
-          color: statusColors[status] || 'black',
-          fillColor: statusColors[status] || 'black',
+          color: color,
+          fillColor: color,
           fillOpacity: 0.8
         }).addTo(map);
 
