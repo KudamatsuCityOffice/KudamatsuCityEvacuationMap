@@ -42,7 +42,8 @@
   <div id="map"></div>
 
   <div class="filter">
-    <label><input type="checkbox" id="showOpenOnly" checked> 開設中のみ表示</label>
+    <label><input type="checkbox" id="showOpenOnly" checked> 開設中のみ表示</label><br>
+    <label><input type="checkbox" id="showPetsOnly"> ペット可のみ表示</label>
   </div>
 
   <div class="legend">
@@ -114,6 +115,7 @@
       allMarkers = [];
 
       const showOpenOnly = document.getElementById('showOpenOnly').checked;
+      const showPetsOnly = document.getElementById('showPetsOnly').checked;
 
       data.forEach(rec => {
         const lat = parseFloat(rec.lat);
@@ -125,6 +127,7 @@
 
         if (!lat || !lng) return;
         if (showOpenOnly && status !== '開設中') return;
+        if (showPetsOnly && !note.includes('ペット可')) return;
 
         const marker = L.marker([lat, lng], { icon }).addTo(map);
         allMarkers.push(marker);
@@ -139,9 +142,8 @@
       });
     }
 
-    document.getElementById('showOpenOnly').addEventListener('change', () => {
-      fetchShelterData();
-    });
+    document.getElementById('showOpenOnly').addEventListener('change', fetchShelterData);
+    document.getElementById('showPetsOnly').addEventListener('change', fetchShelterData);
 
     function fetchShelterData() {
       const script = document.createElement('script');
