@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>避難所マップ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     body, html { margin: 0; padding: 0; height: 100%; }
@@ -14,58 +13,50 @@
 <body>
   <div id="map"></div>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // 地図の初期設定（下松市周辺）
     const map = L.map('map').setView([34.05, 131.85], 13);
 
-    // OpenStreetMapタイルを追加
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // 開設状況ごとの色分け
     const statusColors = {
       '開設中': 'green',
       '未開設': 'gray',
       '閉鎖': 'red'
     };
 
-    // Google Apps Script経由でkintone APIからデータ取得
-    fetch('https://script.google.com/macros/s/AKfycbw2YIShCxCDwOlx3r_xaoaw4swVo1vJlLZXw7_c8FAWxudlW-J2U1Pp_eIGQ554DU9Twg/exec')
-      .then(resp => resp.json())
-      .then(data => {
-        data.forEach(rec => {
-          const lat = parseFloat(rec.lat);
-          const lng = parseFloat(rec.lng);
-          const status = rec.status;
-          const name = rec.name;
-          const note = rec.note || '';
+    function loadShelters(data) {
+      data.forEach(rec => {
+        const lat = parseFloat(rec.lat);
+        const lng = parseFloat(rec.lng);
+        const status = rec.status;
+        const name = rec.name;
+        const note = rec.note || '';
 
-          if (!lat || !lng) return;
+        if (!lat || !lng) return;
 
-          const marker = L.circleMarker([lat, lng], {
-            radius: 8,
-            color: statusColors[status] || 'black',
-            fillColor: statusColors[status] || 'black',
-            fillOpacity: 0.8
-          }).addTo(map);
+        const marker = L.circleMarker([lat, lng], {
+          radius: 8,
+          color: statusColors[status] || 'black',
+          fillColor: statusColors[status] || 'black',
+          fillOpacity: 0.8
+        }).addTo(map);
 
-          const popupHtml = `
-            <strong>${name}</strong><br>
-            状況：${status}<br>
-            備考：${note.replace(/\n/g, '<br>') || 'なし'}
-          `;
+        const popupHtml = `
+          <strong>${name}</strong><br>
+          状況：${status}<br>
+          備考：${note.replace(/\n/g, '<br>') || 'なし'}
+        `;
 
-          marker.bindPopup(popupHtml);
-        });
-      })
-      .catch(err => {
-        console.error('避難所データの取得に失敗しました:', err);
-        alert('避難所データの取得に失敗しました。');
+        marker.bindPopup(popupHtml);
       });
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://script.google.com/macros/s/AKfycbyQvya-1wgCAjVW6XZFS_FDfk5L3-3FHFAFsyUCRaYmpqeFto1Djao85cOagAXi0eREHg/exec?callback=loadShelters';
+    document.body.appendChild(script);
   </script>
 </body>
 </html>
-
