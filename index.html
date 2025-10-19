@@ -43,7 +43,7 @@
 
   <div class="filter">
     <label><input type="checkbox" id="showOpenOnly" checked> 開設中のみ表示</label><br>
-    <label><input type="checkbox" id="showPetsOnly"> ペット可のみ表示</label>
+    <label><input type="checkbox" id="showPetsOnly"> ペット受入可のみ表示</label>
   </div>
 
   <div class="legend">
@@ -127,7 +127,7 @@
 
         if (!lat || !lng) return;
         if (showOpenOnly && status !== '開設中') return;
-        if (showPetsOnly && !note.includes('ペット可')) return;
+        if (showPetsOnly && !note.includes('ペット受入可')) return;
 
         const marker = L.marker([lat, lng], { icon }).addTo(map);
         allMarkers.push(marker);
