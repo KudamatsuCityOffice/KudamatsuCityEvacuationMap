@@ -44,7 +44,9 @@
   <div class="filter">
     <label><input type="checkbox" id="showOpenOnly" checked> 開設中のみ表示</label><br>
     <label><input type="checkbox" id="showPetsOnly"> ペット受入可のみ表示</label><br>
-    <label><input type="checkbox" id="showOstomateOnly"> オストメイトありのみ表示</label>
+    <label><input type="checkbox" id="showOstomateOnly"> オストメイトありのみ表示</label><br>
+    <label><input type="checkbox" id="showWheelchairOnly"> 車椅子対応のみ表示</label><br>
+    <label><input type="checkbox" id="showNursingRoomOnly"> 授乳室ありのみ表示</label>
   </div>
 
   <div class="legend">
@@ -118,6 +120,8 @@
       const showOpenOnly = document.getElementById('showOpenOnly').checked;
       const showPetsOnly = document.getElementById('showPetsOnly').checked;
       const showOstomateOnly = document.getElementById('showOstomateOnly').checked;
+      const showWheelchairOnly = document.getElementById('showWheelchairOnly').checked;
+      const showNursingRoomOnly = document.getElementById('showNursingRoomOnly').checked;
 
       data.forEach(rec => {
         const lat = parseFloat(rec.lat);
@@ -131,6 +135,8 @@
         if (showOpenOnly && status !== '開設中') return;
         if (showPetsOnly && !note.includes('ペット受入可')) return;
         if (showOstomateOnly && !note.includes('オストメイト')) return;
+        if (showWheelchairOnly && !note.includes('車椅子')) return;
+        if (showNursingRoomOnly && !note.includes('授乳室')) return;
 
         const marker = L.marker([lat, lng], { icon }).addTo(map);
         allMarkers.push(marker);
@@ -145,9 +151,17 @@
       });
     }
 
-    document.getElementById('showOpenOnly').addEventListener('change', fetchShelterData);
-    document.getElementById('showPetsOnly').addEventListener('change', fetchShelterData);
-    document.getElementById('showOstomateOnly').addEventListener('change', fetchShelterData);
+    const filters = [
+      'showOpenOnly',
+      'showPetsOnly',
+      'showOstomateOnly',
+      'showWheelchairOnly',
+      'showNursingRoomOnly'
+    ];
+
+    filters.forEach(id => {
+      document.getElementById(id).addEventListener('change', fetchShelterData);
+    });
 
     function fetchShelterData() {
       const script = document.createElement('script');
