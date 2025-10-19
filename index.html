@@ -17,8 +17,8 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // 地図の初期設定
-    const map = L.map('map').setView([34.05, 131.85], 13); // 下松市周辺
+    // 地図の初期設定（下松市周辺）
+    const map = L.map('map').setView([34.05, 131.85], 13);
 
     // OpenStreetMapタイルを追加
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -41,6 +41,7 @@
           const lng = parseFloat(rec.lng);
           const status = rec.status;
           const name = rec.name;
+          const note = rec.note || '';
 
           if (!lat || !lng) return;
 
@@ -51,7 +52,13 @@
             fillOpacity: 0.8
           }).addTo(map);
 
-          marker.bindPopup(`<strong>${name}</strong><br>状況：${status}`);
+          const popupHtml = `
+            <strong>${name}</strong><br>
+            状況：${status}<br>
+            備考：${note.replace(/\n/g, '<br>') || 'なし'}
+          `;
+
+          marker.bindPopup(popupHtml);
         });
       })
       .catch(err => {
@@ -60,5 +67,4 @@
       });
   </script>
 </body>
-
 </html>
