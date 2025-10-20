@@ -57,23 +57,19 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const baseMaps = {
-      "OSM 標準地図": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
-        maxZoom: 19,
-        minZoom: 5
-      })
-    };
-
     const map = L.map('map', {
       center: [34.05, 131.85],
       zoom: 13,
-      layers: [baseMaps["OSM 標準地図"]],
       minZoom: 5,
       maxZoom: 18
     });
 
-    L.control.layers(baseMaps).addTo(map);
+    // OSM標準地図のみ表示
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19,
+      minZoom: 5
+    }).addTo(map);
 
     map.locate({ setView: true, maxZoom: 16 });
 
