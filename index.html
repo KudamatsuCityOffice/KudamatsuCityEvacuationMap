@@ -1,182 +1,46 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>下松市避難所マップ</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <style>
-    body, html { margin: 0; padding: 0; height: 100%; }
-    #map { width: 100%; height: 100vh; }
+function loadShelters(data) {
+  allMarkers.forEach(m => map.removeLayer(m));
+  allMarkers = [];
 
-    .legend, .filter {
-      position: fixed;
-      background: white;
-      padding: 8px 12px;
-      border-radius: 6px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.3);
-      font-size: 14px;
-      line-height: 1.6;
-      z-index: 9999;
-    }
+  const showOpenOnly = document.getElementById('showOpenOnly').checked;
+  const showPetsOnly = document.getElementById('showPetsOnly').checked;
+  const showOstomateOnly = document.getElementById('showOstomateOnly').checked;
+  const showWheelchairOnly = document.getElementById('showWheelchairOnly').checked;
+  const showNursingRoomOnly = document.getElementById('showNursingRoomOnly').checked;
 
-    .legend {
-      bottom: 10px;
-      right: 10px;
-    }
+  data.forEach(rec => {
+    const lat = parseFloat(rec.lat);
+    const lng = parseFloat(rec.lng);
+    const status = rec.status || '未開設';
+    const name = rec.name;
+    const note = rec.note || '';
+    const evacuees = rec.evacuees || 0;
+    const capacity = rec.capacity || 0;
+    const icon = statusIcons[status] || statusIcons['未開設'];
 
-    .filter {
-      top: 10px;
-      left: 10px;
-    }
+    if (!lat || !lng) return;
+    if (showOpenOnly && status !== '開設中') return;
+    if (showPetsOnly && !note.includes('ペット受入可')) return;
+    if (showOstomateOnly && !note.includes('オストメイト')) return;
+    if (showWheelchairOnly && !note.includes('車椅子')) return;
+    if (showNursingRoomOnly && !note.includes('授乳室')) return;
 
-    .legend img {
-      vertical-align: middle;
-      width: 24px;
-      height: 24px;
-      margin-right: 6px;
-    }
-  </style>
-</head>
-<body>
-  <div id="map"></div>
+    const marker = L.marker([lat, lng], { icon }).addTo(map);
+    allMarkers.push(marker);
 
-  <div class="filter">
-    <label><input type="checkbox" id="showOpenOnly" checked> 開設中のみ表示</label><br>
-    <label><input type="checkbox" id="showPetsOnly"> ペット受入可のみ表示</label><br>
-    <label><input type="checkbox" id="showOstomateOnly"> オストメイトありのみ表示</label><br>
-    <label><input type="checkbox" id="showWheelchairOnly"> 車椅子対応のみ表示</label><br>
-    <label><input type="checkbox" id="showNursingRoomOnly"> 授乳室ありのみ表示</label>
-  </div>
+    const congestionRate = (capacity > 0)
+      ? Math.round((evacuees / capacity) * 100)
+      : null;
 
-  <div class="legend">
-    <div><img src="images/open.png" alt="開設中"> 開設中</div>
-    <div><img src="images/not_opened.png" alt="未開設"> 未開設</div>
-    <div><img src="images/closed.png" alt="閉鎖"> 閉鎖</div>
-  </div>
+    const popupHtml = `
+      <strong>${name}</strong><br>
+      開設状況：${status}<br>
+      避難者数：${evacuees}人<br>
+      収容人数：${capacity}人<br>
+      ${congestionRate !== null ? `混雑率：${congestionRate}%<br>` : ''}
+      備考：${note.replace(/\n/g, '<br>') || 'なし'}
+    `;
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    const map = L.map('map', {
-      center: [34.05, 131.85],
-      zoom: 13,
-      minZoom: 5,
-      maxZoom: 18
-    });
-
-    // OSM標準地図のみ表示
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19,
-      minZoom: 5
-    }).addTo(map);
-
-    map.locate({ setView: true, maxZoom: 16 });
-
-    map.on('locationfound', function(e) {
-      const radius = e.accuracy;
-
-      const marker = L.circleMarker(e.latlng, {
-        radius: 8,
-        fillColor: '#3388ff',
-        color: '#fff',
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.8
-      }).addTo(map);
-
-      marker.bindPopup("現在地").openPopup();
-
-      L.circle(e.latlng, radius, {
-        color: '#3388ff',
-        fillOpacity: 0.1
-      }).addTo(map);
-    });
-
-    map.on('locationerror', function(e) {
-      alert("現在地を取得できませんでした：" + e.message);
-    });
-
-    const statusIcons = {
-      '開設中': L.icon({
-        iconUrl: 'images/open.png',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
-      }),
-      '閉鎖': L.icon({
-        iconUrl: 'images/closed.png',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
-      }),
-      '未開設': L.icon({
-        iconUrl: 'images/not_opened.png',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
-      })
-    };
-
-    let allMarkers = [];
-
-    function loadShelters(data) {
-      allMarkers.forEach(m => map.removeLayer(m));
-      allMarkers = [];
-
-      const showOpenOnly = document.getElementById('showOpenOnly').checked;
-      const showPetsOnly = document.getElementById('showPetsOnly').checked;
-      const showOstomateOnly = document.getElementById('showOstomateOnly').checked;
-      const showWheelchairOnly = document.getElementById('showWheelchairOnly').checked;
-      const showNursingRoomOnly = document.getElementById('showNursingRoomOnly').checked;
-
-      data.forEach(rec => {
-        const lat = parseFloat(rec.lat);
-        const lng = parseFloat(rec.lng);
-        const status = rec.status || '未開設';
-        const name = rec.name;
-        const note = rec.note || '';
-        const icon = statusIcons[status] || statusIcons['未開設'];
-
-        if (!lat || !lng) return;
-        if (showOpenOnly && status !== '開設中') return;
-        if (showPetsOnly && !note.includes('ペット受入可')) return;
-        if (showOstomateOnly && !note.includes('オストメイト')) return;
-        if (showWheelchairOnly && !note.includes('車椅子')) return;
-        if (showNursingRoomOnly && !note.includes('授乳室')) return;
-
-        const marker = L.marker([lat, lng], { icon }).addTo(map);
-        allMarkers.push(marker);
-
-        const popupHtml = `
-          <strong>${name}</strong><br>
-          開設状況：${status}<br>
-          備考：${note.replace(/\n/g, '<br>') || 'なし'}
-        `;
-
-        marker.bindPopup(popupHtml);
-      });
-    }
-
-    const filters = [
-      'showOpenOnly',
-      'showPetsOnly',
-      'showOstomateOnly',
-      'showWheelchairOnly',
-      'showNursingRoomOnly'
-    ];
-
-    filters.forEach(id => {
-      document.getElementById(id).addEventListener('change', fetchShelterData);
-    });
-
-    function fetchShelterData() {
-      const script = document.createElement('script');
-      script.src = 'https://script.google.com/macros/s/AKfycbx3cs1r3Gcy0-gGSf6Wy2YAkbyIpIbNuI3QTrszwNoZlJvq5LIvApZwaSuDmz-u3uxmQQ/exec?callback=loadShelters';
-      document.body.appendChild(script);
-    }
-
-    fetchShelterData();
-  </script>
-</body>
-</html>
+    marker.bindPopup(popupHtml);
+  });
+}
