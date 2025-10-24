@@ -150,7 +150,7 @@
           <strong>${name}</strong><br>
           開設状況：${status}<br>
           避難者数：${evacuees}人<br>
-          収容人数：${capacity}人<br>
+          収容可能人数：${capacity}人<br>
           ${congestionRate !== null ? `混雑率：${congestionRate}%<br>` : ''}
           備考：${note.replace(/\n/g, '<br>') || 'なし'}
         `;
@@ -181,3 +181,4 @@
   </script>
 </body>
 </html>
+
