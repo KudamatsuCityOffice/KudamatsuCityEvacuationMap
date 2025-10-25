@@ -86,7 +86,7 @@
     });
 
     map.on('locationerror', function(e) {
-      alert("現在地を取得できませんでした：" + e.message);
+      console.warn("現在地を取得できませんでした：" + e.message);
     });
 
     const statusIcons = {
@@ -112,6 +112,7 @@
 
     let allMarkers = [];
 
+    // === データ読込・描画関数 ===
     function loadShelters(data) {
       allMarkers.forEach(m => map.removeLayer(m));
       allMarkers = [];
@@ -159,6 +160,7 @@
       });
     }
 
+    // === チェックボックス変更時の再描画 ===
     const filters = [
       'showOpenOnly',
       'showPetsOnly',
@@ -171,14 +173,15 @@
       document.getElementById(id).addEventListener('change', fetchShelterData);
     });
 
+    // === GASからデータ取得 ===
     function fetchShelterData() {
       const script = document.createElement('script');
       script.src = 'https://script.google.com/macros/s/AKfycbx3cs1r3Gcy0-gGSf6Wy2YAkbyIpIbNuI3QTrszwNoZlJvq5LIvApZwaSuDmz-u3uxmQQ/exec?callback=loadShelters';
       document.body.appendChild(script);
     }
 
+    // 初回ロード
     fetchShelterData();
   </script>
 </body>
 </html>
-
