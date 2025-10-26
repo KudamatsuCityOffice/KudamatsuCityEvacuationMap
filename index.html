@@ -67,7 +67,6 @@
 
     map.on('locationfound', function(e) {
       const radius = e.accuracy;
-
       const marker = L.circleMarker(e.latlng, {
         radius: 8,
         fillColor: '#3388ff',
@@ -76,13 +75,8 @@
         opacity: 1,
         fillOpacity: 0.8
       }).addTo(map);
-
       marker.bindPopup("現在地").openPopup();
-
-      L.circle(e.latlng, radius, {
-        color: '#3388ff',
-        fillOpacity: 0.1
-      }).addTo(map);
+      L.circle(e.latlng, radius, { color: '#3388ff', fillOpacity: 0.1 }).addTo(map);
     });
 
     map.on('locationerror', function(e) {
@@ -90,29 +84,13 @@
     });
 
     const statusIcons = {
-      '開設中': L.icon({
-        iconUrl: 'images/open.png',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
-      }),
-      '閉鎖': L.icon({
-        iconUrl: 'images/closed.png',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
-      }),
-      '未開設': L.icon({
-        iconUrl: 'images/not_opened.png',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
-      })
+      '開設中': L.icon({ iconUrl: 'images/open.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32] }),
+      '閉鎖': L.icon({ iconUrl: 'images/closed.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32] }),
+      '未開設': L.icon({ iconUrl: 'images/not_opened.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32] })
     };
 
     let allMarkers = [];
 
-    // === データ読込・描画関数 ===
     function loadShelters(data) {
       allMarkers.forEach(m => map.removeLayer(m));
       allMarkers = [];
@@ -126,49 +104,44 @@
       data.forEach(rec => {
         const lat = parseFloat(rec.lat);
         const lng = parseFloat(rec.lng);
+        if (!lat || !lng) return;
+
         const status = rec.status || '未開設';
         const name = rec.name;
         const note = rec.note || '';
-        const evacuees = Number(rec.evacuees);  // 数値化
-        const capacity = Number(rec.capacity);  // 数値化
-        const icon = statusIcons[status] || statusIcons['未開設'];
 
-        if (!lat || !lng) return;
+        // 数字変換：trimで余計な空白や改行を除去
+        const evacuees = rec.evacuees ? Number(String(rec.evacuees).trim()) : 0;
+        const capacity  = rec.capacity  ? Number(String(rec.capacity).trim())  : 0;
+
         if (showOpenOnly && status !== '開設中') return;
         if (showPetsOnly && !note.includes('ペット受入可')) return;
         if (showOstomateOnly && !note.includes('オストメイト')) return;
         if (showWheelchairOnly && !note.includes('車椅子')) return;
         if (showNursingRoomOnly && !note.includes('授乳室')) return;
 
+        const icon = statusIcons[status] || statusIcons['未開設'];
         const marker = L.marker([lat, lng], { icon }).addTo(map);
         allMarkers.push(marker);
 
         const popupHtml = `
           <strong>${name}</strong><br>
           開設状況：${status}<br>
-          避難者数：${evacuees.toLocaleString()}人<br>
-          収容可能人数：${capacity.toLocaleString()}人<br>
+          避難者数：${evacuees}人<br>
+          収容可能人数：${capacity}人<br>
           備考：${note.replace(/\n/g, '<br>') || 'なし'}
         `;
-
         marker.bindPopup(popupHtml);
       });
     }
 
-    // === チェックボックス変更時の再描画 ===
-    const filters = [
-      'showOpenOnly',
-      'showPetsOnly',
-      'showOstomateOnly',
-      'showWheelchairOnly',
-      'showNursingRoomOnly'
-    ];
-
+    // チェックボックス変更時に再描画
+    const filters = ['showOpenOnly','showPetsOnly','showOstomateOnly','showWheelchairOnly','showNursingRoomOnly'];
     filters.forEach(id => {
       document.getElementById(id).addEventListener('change', fetchShelterData);
     });
 
-    // === GASからデータ取得 ===
+    // GASからJSONPでデータ取得
     function fetchShelterData() {
       const script = document.createElement('script');
       script.src = 'https://script.google.com/macros/s/AKfycbx3cs1r3Gcy0-gGSf6Wy2YAkbyIpIbNuI3QTrszwNoZlJvq5LIvApZwaSuDmz-u3uxmQQ/exec?callback=loadShelters';
