@@ -129,8 +129,8 @@
         const status = rec.status || '未開設';
         const name = rec.name;
         const note = rec.note || '';
-        const evacuees = rec.evacuees || '';
-        const capacity = rec.capacity || '';
+        const evacuees = Number(rec.evacuees);  // 数値化
+        const capacity = Number(rec.capacity);  // 数値化
         const icon = statusIcons[status] || statusIcons['未開設'];
 
         if (!lat || !lng) return;
@@ -146,8 +146,8 @@
         const popupHtml = `
           <strong>${name}</strong><br>
           開設状況：${status}<br>
-          避難者数：${evacuees}<br>
-          収容可能人数：${capacity}<br>
+          避難者数：${evacuees.toLocaleString()}人<br>
+          収容可能人数：${capacity.toLocaleString()}人<br>
           備考：${note.replace(/\n/g, '<br>') || 'なし'}
         `;
 
