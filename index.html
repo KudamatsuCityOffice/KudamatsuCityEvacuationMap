@@ -111,7 +111,6 @@
 
     let allMarkers = [];
 
-    // === データ読込・描画関数 ===
     function loadShelters(data) {
       allMarkers.forEach(m => map.removeLayer(m));
       allMarkers = [];
@@ -129,9 +128,15 @@
         const name = rec.name;
         const note = rec.note || '';
 
-        // 数字だけ抽出して安全に変換
-        const evacuees = Number((rec.evacuees || '0').toString().replace(/[^\d]/g, '')) || 0;
-        const capacity = Number((rec.capacity || '0').toString().replace(/[^\d]/g, '')) || 0;
+        // 避難者数を合計
+        let evacuees = 0;
+        if (rec.evacueesRecords && Array.isArray(rec.evacueesRecords)) {
+          evacuees = rec.evacueesRecords.reduce((sum, e) => sum + (parseInt(e.count, 10) || 0), 0);
+        } else {
+          evacuees = parseInt(rec.evacuees || '0', 10);
+        }
+
+        const capacity = parseInt(rec.capacity || '0', 10);
 
         const icon = statusIcons[status] || statusIcons['未開設'];
 
@@ -157,7 +162,6 @@
       });
     }
 
-    // === チェックボックス変更時の再描画 ===
     const filters = [
       'showOpenOnly',
       'showPetsOnly',
@@ -170,14 +174,12 @@
       document.getElementById(id).addEventListener('change', fetchShelterData);
     });
 
-    // === GASからデータ取得 ===
     function fetchShelterData() {
       const script = document.createElement('script');
       script.src = 'https://script.google.com/macros/s/AKfycbx3cs1r3Gcy0-gGSf6Wy2YAkbyIpIbNuI3QTrszwNoZlJvq5LIvApZwaSuDmz-u3uxmQQ/exec?callback=loadShelters';
       document.body.appendChild(script);
     }
 
-    // 初回ロード
     fetchShelterData();
   </script>
 </body>
