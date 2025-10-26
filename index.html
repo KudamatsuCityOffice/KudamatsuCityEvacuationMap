@@ -112,8 +112,9 @@
 
     let allMarkers = [];
 
-    // === データ読込・描画関数 ===
     function loadShelters(data) {
+      console.log('受信データ:', data); // ✅ デバッグ用
+
       allMarkers.forEach(m => map.removeLayer(m));
       allMarkers = [];
 
@@ -129,8 +130,8 @@
         const status = rec.status || '未開設';
         const name = rec.name;
         const note = rec.note || '';
-        const evacuees = rec.evacuees || 0;
-        const capacity = rec.capacity || 0;
+        const evacuees = Number(rec.evacuees) || 0; // ✅ 型変換
+        const capacity = Number(rec.capacity) || 0; // ✅ 型変換
         const icon = statusIcons[status] || statusIcons['未開設'];
 
         if (!lat || !lng) return;
@@ -160,7 +161,6 @@
       });
     }
 
-    // === チェックボックス変更時の再描画 ===
     const filters = [
       'showOpenOnly',
       'showPetsOnly',
@@ -173,14 +173,12 @@
       document.getElementById(id).addEventListener('change', fetchShelterData);
     });
 
-    // === GASからデータ取得 ===
     function fetchShelterData() {
       const script = document.createElement('script');
       script.src = 'https://script.google.com/macros/s/AKfycbx3cs1r3Gcy0-gGSf6Wy2YAkbyIpIbNuI3QTrszwNoZlJvq5LIvApZwaSuDmz-u3uxmQQ/exec?callback=loadShelters';
       document.body.appendChild(script);
     }
 
-    // 初回ロード
     fetchShelterData();
   </script>
 </body>
