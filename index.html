@@ -174,7 +174,7 @@
     // GAS の URL をここに設定
     function fetchShelterData() {
       const script = document.createElement('script');
-      script.src = 'https://script.google.com/macros/s/AKfycbzOFE_6RyMmNgtTZaB_PVoHoMOJ7SFKlnM05BtbTSCfrhpNDeStXLvAAJv1jTzLzE5hPg/exec';
+      script.src = 'https://script.google.com/macros/s/AKfycbzOFE_6RyMmNgtTZaB_PVoHoMOJ7SFKlnM05BtbTSCfrhpNDeStXLvAAJv1jTzLzE5hPg/exec?callback=loadShelters';
       document.body.appendChild(script);
     }
 
