@@ -78,42 +78,18 @@
       }).addTo(map);
 
       marker.bindPopup("現在地").openPopup();
-
-      L.circle(e.latlng, radius, {
-        color: '#3388ff',
-        fillOpacity: 0.1
-      }).addTo(map);
-    });
-
-    map.on('locationerror', function(e) {
-      console.warn("現在地を取得できませんでした：" + e.message);
     });
 
     // アイコン定義
     const statusIcons = {
-      '開設中': L.icon({
-        iconUrl: 'images/open.png',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
-      }),
-      '閉鎖': L.icon({
-        iconUrl: 'images/closed.png',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
-      }),
-      '未開設': L.icon({
-        iconUrl: 'images/not_opened.png',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
-      })
+      '開設中': L.icon({ iconUrl: 'images/open.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32] }),
+      '閉鎖': L.icon({ iconUrl: 'images/closed.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32] }),
+      '未開設': L.icon({ iconUrl: 'images/not_opened.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32] })
     };
 
     let allMarkers = [];
 
-    // ★ ここが修正された重要部分
+    // 避難所データを読み込んで地図に表示
     function loadShelters(data) {
       allMarkers.forEach(m => map.removeLayer(m));
       allMarkers = [];
@@ -130,10 +106,7 @@
         const status = rec.status || '未開設';
         const name = rec.name;
         const note = rec.note || '';
-
-        // ★ GAS が返す evacuees をそのまま使う
         const evacuees = parseInt(rec.evacuees || '0', 10);
-
         const capacity = parseInt(rec.capacity || '0', 10);
         const icon = statusIcons[status] || statusIcons['未開設'];
 
@@ -154,33 +127,32 @@
           収容可能人数：${capacity}人<br>
           備考：${note.replace(/\n/g, '<br>') || 'なし'}
         `;
-
         marker.bindPopup(popupHtml);
       });
     }
 
-    const filters = [
-      'showOpenOnly',
-      'showPetsOnly',
-      'showOstomateOnly',
-      'showWheelchairOnly',
-      'showNursingRoomOnly'
-    ];
+    // fetch を使ったデータ取得処理
+    function fetchShelterData() {
+      const url = 'https://script.google.com/macros/s/AKfycbzOFE_6RyMmNgtTZaB_PVoHoMOJ7SFKlnM05BtbTSCfrhpNDeStXLvAAJv1jTzLzE5hPg/exec';
+      
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          loadShelters(data);
+        })
+        .catch(error => {
+          console.error('データ取得エラー:', error);
+          alert('避難所データの取得に失敗しました。');
+        });
+    }
 
-    filters.forEach(id => {
+    // フィルタ変更時のイベント設定
+    ['showOpenOnly', 'showPetsOnly', 'showOstomateOnly', 'showWheelchairOnly', 'showNursingRoomOnly'].forEach(id => {
       document.getElementById(id).addEventListener('change', fetchShelterData);
     });
 
-    // GAS の URL をここに設定
-    function fetchShelterData() {
-      const script = document.createElement('script');
-      script.src = 'https://script.google.com/macros/s/AKfycbzOFE_6RyMmNgtTZaB_PVoHoMOJ7SFKlnM05BtbTSCfrhpNDeStXLvAAJv1jTzLzE5hPg/exec?callback=loadShelters';
-      document.body.appendChild(script);
-    }
-
+    // 初期読み込み
     fetchShelterData();
   </script>
 </body>
 </html>
-
-
